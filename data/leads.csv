@@ -1,0 +1,101 @@
+lead_id,resource_name,branch_name,city,region,category,status,revenue,signing_value,unit,quarter,year
+1001,Jharna Rajani,Main HQ,Karachi,Sindh,RFP,Won,420851,651000,CRM,Q1,2025
+1002,Muhammad Junaid,DHA Branch,Karachi,Sindh,RFC,Pending,150000,380000,EFT,Q1,2025
+1003,Mehreen Nazar,Sialkot Cantt,Sialkot,Punjab,RFP,Won,205336,317000,MDU,Q1,2025
+1004,Aqsa Muhammad Akther,Gulberg,Lahore,Punjab,RFC,Won,310000,159139,BSO,Q1,2025
+1005,Adnan Farooq,Main HQ,Karachi,Sindh,RFP,Lost,0,50500,CRM,Q1,2025
+1006,Fatima Arshad,Sialkot Cantt,Sialkot,Punjab,RFC,Pending,75000,10000,EFT,Q1,2025
+1007,Jharna Rajani,F-7 Markaz,Islamabad,ICT,RFP,Won,120000,288002,MDU,Q1,2025
+1008,Muhammad Junaid,Civil Lines,Faisalabad,Punjab,RFC,Won,95000,168295,BSO,Q1,2025
+1009,Mehreen Nazar,Cantonment,Multan,Punjab,RFP,Pending,60000,70000,CRM,Q1,2025
+1010,Aqsa Muhammad Akther,University Road,Peshawar,KPK,RFC,Lost,45000,233000,EFT,Q1,2025
+1011,Adnan Farooq,Latifabad,Hyderabad,Sindh,RFP,Won,88000,36000,MDU,Q1,2025
+1012,Fatima Arshad,GT Road,Gujranwala,Punjab,RFC,Won,112000,30000,BSO,Q1,2025
+1013,Jharna Rajani,Main HQ,Karachi,Sindh,RFP,Won,250000,400000,CRM,Q2,2025
+1014,Muhammad Junaid,DHA Branch,Karachi,Sindh,RFC,Won,180000,220000,EFT,Q2,2025
+1015,Mehreen Nazar,Sialkot Cantt,Sialkot,Punjab,RFP,Lost,0,15000,MDU,Q2,2025
+1016,Aqsa Muhammad Akther,Gulberg,Lahore,Punjab,RFC,Pending,90000,110000,BSO,Q2,2025
+1017,Adnan Farooq,F-7 Markaz,Islamabad,ICT,RFP,Won,135000,180000,CRM,Q2,2025
+1018,Fatima Arshad,Civil Lines,Faisalabad,Punjab,RFC,Won,77000,85000,EFT,Q2,2025
+1019,Jharna Rajani,Cantonment,Multan,Punjab,RFP,Won,210000,250000,MDU,Q2,2025
+1020,Muhammad Junaid,University Road,Peshawar,KPK,RFC,Pending,33000,45000,BSO,Q2,2025
+1021,Mehreen Nazar,Latifabad,Hyderabad,Sindh,RFP,Won,92000,105000,CRM,Q2,2025
+1022,Aqsa Muhammad Akther,GT Road,Gujranwala,Punjab,RFC,Lost,0,25000,EFT,Q2,2025
+1023,Adnan Farooq,Main HQ,Karachi,Sindh,RFP,Won,155000,190000,MDU,Q3,2025
+1024,Fatima Arshad,DHA Branch,Karachi,Sindh,RFC,Won,125000,140000,BSO,Q3,2025
+1025,Jharna Rajani,Sialkot Cantt,Sialkot,Punjab,RFP,Won,310000,350000,CRM,Q3,2025
+1026,Muhammad Junaid,Gulberg,Lahore,Punjab,RFC,Pending,45000,60000,EFT,Q3,2025
+1027,Mehreen Nazar,F-7 Markaz,Islamabad,ICT,RFP,Won,205000,230000,MDU,Q3,2025
+1028,Aqsa Muhammad Akther,Civil Lines,Faisalabad,Punjab,RFC,Won,118000,130000,BSO,Q3,2025
+1029,Adnan Farooq,Cantonment,Multan,Punjab,RFP,Lost,0,10000,CRM,Q3,2025
+1030,Fatima Arshad,University Road,Peshawar,KPK,RFC,Won,89000,95000,EFT,Q3,2025
+1031,Jharna Rajani,Latifabad,Hyderabad,Sindh,RFP,Won,67000,75000,MDU,Q3,2025
+1032,Muhammad Junaid,GT Road,Gujranwala,Punjab,RFC,Won,142000,160000,BSO,Q3,2025
+1033,Mehreen Nazar,Main HQ,Karachi,Sindh,RFP,Won,290000,320000,CRM,Q4,2025
+1034,Aqsa Muhammad Akther,DHA Branch,Karachi,Sindh,RFC,Won,210000,240000,EFT,Q4,2025
+1035,Adnan Farooq,Sialkot Cantt,Sialkot,Punjab,RFP,Pending,55000,70000,MDU,Q4,2025
+1036,Fatima Arshad,Gulberg,Lahore,Punjab,RFC,Won,185000,210000,BSO,Q4,2025
+1037,Jharna Rajani,F-7 Markaz,Islamabad,ICT,RFP,Won,155000,175000,CRM,Q4,2025
+1038,Muhammad Junaid,Civil Lines,Faisalabad,Punjab,RFC,Lost,0,20000,EFT,Q4,2025
+1039,Mehreen Nazar,Cantonment,Multan,Punjab,RFP,Won,235000,260000,MDU,Q4,2025
+1040,Aqsa Muhammad Akther,University Road,Peshawar,KPK,RFC,Won,115000,125000,BSO,Q4,2025
+1041,Adnan Farooq,Latifabad,Hyderabad,Sindh,RFP,Won,99000,110000,CRM,Q4,2025
+1042,Fatima Arshad,GT Road,Gujranwala,Punjab,RFC,Won,128000,145000,EFT,Q4,2025
+1043,Jharna Rajani,Main HQ,Karachi,Sindh,RFP,Won,410000,500000,MDU,Q1,2024
+1044,Muhammad Junaid,DHA Branch,Karachi,Sindh,RFC,Won,320000,350000,BSO,Q1,2024
+1045,Mehreen Nazar,Sialkot Cantt,Sialkot,Punjab,RFP,Lost,0,5000,CRM,Q1,2024
+1046,Aqsa Muhammad Akther,Gulberg,Lahore,Punjab,RFC,Pending,120000,150000,EFT,Q1,2024
+1047,Adnan Farooq,F-7 Markaz,Islamabad,ICT,RFP,Won,245000,280000,MDU,Q1,2024
+1048,Fatima Arshad,Civil Lines,Faisalabad,Punjab,RFC,Won,165000,185000,BSO,Q1,2024
+1049,Jharna Rajani,Cantonment,Multan,Punjab,RFP,Won,195000,210000,CRM,Q1,2024
+1050,Muhammad Junaid,University Road,Peshawar,KPK,RFC,Won,75000,90000,EFT,Q1,2024
+1051,Mehreen Nazar,Latifabad,Hyderabad,Sindh,RFP,Won,110000,130000,MDU,Q1,2024
+1052,Aqsa Muhammad Akther,GT Road,Gujranwala,Punjab,RFC,Won,135000,155000,BSO,Q1,2024
+1053,Adnan Farooq,Main HQ,Karachi,Sindh,RFP,Pending,85000,100000,CRM,Q2,2024
+1054,Fatima Arshad,DHA Branch,Karachi,Sindh,RFC,Won,265000,300000,EFT,Q2,2024
+1055,Jharna Rajani,Sialkot Cantt,Sialkot,Punjab,RFP,Won,225000,250000,MDU,Q2,2024
+1056,Muhammad Junaid,Gulberg,Lahore,Punjab,RFC,Won,145000,170000,BSO,Q2,2024
+1057,Mehreen Nazar,F-7 Markaz,Islamabad,ICT,RFP,Won,195000,220000,CRM,Q2,2024
+1058,Aqsa Muhammad Akther,Civil Lines,Faisalabad,Punjab,RFC,Lost,0,15000,EFT,Q2,2024
+1059,Adnan Farooq,Cantonment,Multan,Punjab,RFP,Won,115000,135000,MDU,Q2,2024
+1060,Fatima Arshad,University Road,Peshawar,KPK,RFC,Won,95000,110000,BSO,Q2,2024
+1061,Jharna Rajani,Latifabad,Hyderabad,Sindh,RFP,Won,142000,165000,CRM,Q2,2024
+1062,Muhammad Junaid,GT Road,Gujranwala,Punjab,RFC,Won,118000,135000,EFT,Q2,2024
+1063,Mehreen Nazar,Main HQ,Karachi,Sindh,RFP,Won,350000,420000,MDU,Q3,2024
+1064,Aqsa Muhammad Akther,DHA Branch,Karachi,Sindh,RFC,Won,280000,330000,BSO,Q3,2024
+1065,Adnan Farooq,Sialkot Cantt,Sialkot,Punjab,RFP,Won,175000,200000,CRM,Q3,2024
+1066,Fatima Arshad,Gulberg,Lahore,Punjab,RFC,Won,215000,250000,EFT,Q3,2024
+1067,Jharna Rajani,F-7 Markaz,Islamabad,ICT,RFP,Pending,95000,115000,MDU,Q3,2024
+1068,Muhammad Junaid,Civil Lines,Faisalabad,Punjab,RFC,Won,132000,155000,BSO,Q3,2024
+1069,Mehreen Nazar,Cantonment,Multan,Punjab,RFP,Won,188000,210000,CRM,Q3,2024
+1070,Aqsa Muhammad Akther,University Road,Peshawar,KPK,RFC,Won,105000,125000,EFT,Q3,2024
+1071,Adnan Farooq,Latifabad,Hyderabad,Sindh,RFP,Won,122000,140000,MDU,Q3,2024
+1072,Fatima Arshad,GT Road,Gujranwala,Punjab,RFC,Lost,0,10000,BSO,Q3,2024
+1073,Jharna Rajani,Main HQ,Karachi,Sindh,RFP,Won,440000,520000,CRM,Q4,2024
+1074,Muhammad Junaid,DHA Branch,Karachi,Sindh,RFC,Won,315000,360000,EFT,Q4,2024
+1075,Mehreen Nazar,Sialkot Cantt,Sialkot,Punjab,RFP,Won,265000,300000,MDU,Q4,2024
+1076,Aqsa Muhammad Akther,Gulberg,Lahore,Punjab,RFC,Won,195000,225000,BSO,Q4,2024
+1077,Adnan Farooq,F-7 Markaz,Islamabad,ICT,RFP,Won,210000,245000,CRM,Q4,2024
+1078,Fatima Arshad,Civil Lines,Faisalabad,Punjab,RFC,Pending,65000,85000,EFT,Q4,2024
+1079,Jharna Rajani,Cantonment,Multan,Punjab,RFP,Won,285000,320000,MDU,Q4,2024
+1080,Muhammad Junaid,University Road,Peshawar,KPK,RFC,Won,145000,165000,BSO,Q4,2024
+1081,Mehreen Nazar,Latifabad,Hyderabad,Sindh,RFP,Won,132000,150000,CRM,Q4,2024
+1082,Aqsa Muhammad Akther,GT Road,Gujranwala,Punjab,RFC,Won,158000,180000,EFT,Q4,2024
+1083,Adnan Farooq,Main HQ,Karachi,Sindh,RFP,Won,390000,450000,MDU,Q1,2023
+1084,Fatima Arshad,DHA Branch,Karachi,Sindh,RFC,Won,295000,340000,BSO,Q1,2023
+1085,Jharna Rajani,Sialkot Cantt,Sialkot,Punjab,RFP,Won,245000,285000,CRM,Q1,2023
+1086,Muhammad Junaid,Gulberg,Lahore,Punjab,RFC,Won,215000,255000,EFT,Q1,2023
+1087,Mehreen Nazar,F-7 Markaz,Islamabad,ICT,RFP,Lost,0,10000,MDU,Q1,2023
+1088,Aqsa Muhammad Akther,Civil Lines,Faisalabad,Punjab,RFC,Won,148000,175000,BSO,Q1,2023
+1089,Adnan Farooq,Cantonment,Multan,Punjab,RFP,Won,192000,225000,CRM,Q1,2023
+1090,Fatima Arshad,University Road,Peshawar,KPK,RFC,Won,108000,130000,EFT,Q1,2023
+1091,Jharna Rajani,Latifabad,Hyderabad,Sindh,RFP,Pending,45000,60000,MDU,Q1,2023
+1092,Muhammad Junaid,GT Road,Gujranwala,Punjab,RFC,Won,122000,145000,BSO,Q1,2023
+1093,Mehreen Nazar,Main HQ,Karachi,Sindh,RFP,Won,330000,390000,CRM,Q2,2023
+1094,Aqsa Muhammad Akther,DHA Branch,Karachi,Sindh,RFC,Won,275000,325000,EFT,Q2,2023
+1095,Adnan Farooq,Sialkot Cantt,Sialkot,Punjab,RFP,Won,215000,260000,MDU,Q2,2023
+1096,Fatima Arshad,Gulberg,Lahore,Punjab,RFC,Won,245000,290000,BSO,Q2,2023
+1097,Jharna Rajani,F-7 Markaz,Islamabad,ICT,RFP,Won,185000,220000,CRM,Q2,2023
+1098,Muhammad Junaid,Civil Lines,Faisalabad,Punjab,RFC,Won,115000,140000,EFT,Q2,2023
+1099,Mehreen Nazar,Cantonment,Multan,Punjab,RFP,Pending,75000,95000,MDU,Q2,2023
+1100,Aqsa Muhammad Akther,University Road,Peshawar,KPK,RFC,Won,132000,155000,BSO,Q2,2023
