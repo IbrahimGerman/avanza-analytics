@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Search, Bell, ChevronDown, X, CheckCircle, AlertTriangle, Info, LogOut, Settings, User, FileText, Download } from 'lucide-react';
+import { Search, Bell, ChevronDown, X, CheckCircle, AlertTriangle, Info, LogOut, Settings, User, FileText, Download, Loader2 } from 'lucide-react';
 import { useDashboardStore } from '../store/useDashboardStore';
+import SearchBar from './SearchBar';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 
@@ -11,8 +12,9 @@ const notifIcon = { alert: AlertTriangle, success: CheckCircle, info: Info };
 const notifColor = { alert: 'text-red-500 bg-red-50', success: 'text-green-500 bg-green-50', info: 'text-blue-500 bg-blue-50' };
 
 const Header = ({ title = 'Dashboard Overview' }) => {
+
     const {
-        selectedMember, dashboardMode, resetDashboard, searchQuery, setSearchQuery,
+        selectedMember, dashboardMode, resetDashboard,
         selectedYear, selectedQuarter, setYear, setQuarter,
         notifications, notificationsOpen, toggleNotifications, closeNotifications, markAllRead, dismissNotification,
         profileOpen, toggleProfile, closeProfile, currentUser,
@@ -84,22 +86,8 @@ const Header = ({ title = 'Dashboard Overview' }) => {
             </div>
 
             {/* Search bar */}
-            <div className={`flex-1 max-w-md relative flex items-center transition-all ${focused ? 'max-w-xl' : ''}`}>
-                <Search className="absolute left-3 text-slate-400" size={15} />
-                <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    onFocus={() => setFocused(true)}
-                    onBlur={() => setFocused(false)}
-                    placeholder={`Search consultants, regions, metrics…`}
-                    className="w-full bg-white border border-transparent rounded-lg pl-9 pr-4 py-2 text-sm text-black outline-none focus:border-avanza-300 focus:ring-2 focus:ring-avanza-100 transition-all placeholder:text-slate-400 cursor-text"
-                />
-                {searchQuery && (
-                    <button onClick={() => setSearchQuery('')} className="absolute right-3 text-slate-400 hover:text-slate-600">
-                        <X size={13} />
-                    </button>
-                )}
+            <div className={`flex-1 flex max-w-2xl transition-all ${focused ? 'max-w-3xl' : ''}`}>
+                <SearchBar />
             </div>
 
             <div className="ml-auto flex items-center gap-3">

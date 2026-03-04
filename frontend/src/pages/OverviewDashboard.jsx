@@ -1,4 +1,6 @@
 import React from 'react';
+import { X } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, AreaChart, Area } from 'recharts';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDashboardStore } from '../store/useDashboardStore';
 import Sidebar from '../components/Sidebar';
@@ -72,7 +74,7 @@ const chartRelevancy = (searchResult) => {
 };
 
 const OverviewDashboard = () => {
-    const { selectedMember, dashboardMode, setSelectedMember, resetDashboard, searchResult, getKpis, getMonthlyData } = useDashboardStore();
+    const { selectedMember, dashboardMode, setSelectedMember, resetDashboard, searchResult, getKpis, getMonthlyData, searchQuery } = useDashboardStore();
     const isSales = dashboardMode === 'sales';
 
     const baseKpis = getKpis();
@@ -94,6 +96,154 @@ const OverviewDashboard = () => {
                 <Header title={selectedMember ? `${selectedMember} — Performance` : 'Dashboard Overview'} />
                 <main className="flex-1 overflow-y-auto p-6 space-y-6">
 
+                    {/* AI Vision Results Overlay / Gallery */}
+                    <AnimatePresence>
+                        {searchQuery && searchResult && (
+                            <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                className="mb-6 min-h-[400px] overflow-hidden"
+                            >
+                                <div className="flex flex-col gap-4">
+                                    {/* Insight Card */}
+                                    <div className="bg-[#002147]/95 border border-[#E31E24]/30 p-5 rounded-xl shadow-lg relative overflow-hidden backdrop-blur-md">
+                                        <div className="absolute top-0 right-0 w-64 h-64 bg-[#E31E24]/5 blur-[80px] rounded-full pointer-events-none" />
+                                        <div className="flex items-center justify-between mb-2 relative z-10">
+                                            <div className="flex items-center gap-2">
+                                                <span className="w-2 h-2 rounded-full bg-[#E31E24] animate-pulse" />
+                                                <h3 className="text-white/80 font-black uppercase text-xs tracking-widest">AI Result Interpretation</h3>
+                                            </div>
+                                            <button onClick={() => resetDashboard()} className="text-white/40 hover:text-white transition-colors">
+                                                <X size={16} />
+                                            </button>
+                                        </div>
+                                        <p className="text-white/60 text-xs">
+                                            {searchQuery || "Avanza Intelligence Overview"}
+                                        </p>
+                                        <p className="text-white text-lg font-medium leading-relaxed relative z-10">{searchResult.insights}</p>
+                                    </div>
+                                    {/* Triple-Chart Gallery */}
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        {/* Slot 1: Primary View */}
+                                        <div className="bg-[#002147]/80 border border-white/5 p-4 rounded-xl flex flex-col items-center justify-center h-64 shadow-inner min-h-[300px]">
+                                            <h4 className="text-white/60 text-xs font-bold uppercase mb-4 text-center tracking-wider w-full">{searchResult.chartType || 'Primary'} View</h4>
+                                            {(() => {
+                                                const rawData = searchResult.primaryData && searchResult.primaryData.length > 0
+                                                    ? searchResult.primaryData
+                                                    : [{ name: 'No Data', value: 0 }];
+
+                                                const displayData = rawData.map((d, i) => {
+                                                    const keys = Object.keys(d);
+                                                    return {
+                                                        name: String(d[keys[0]] || `Item ${i}`),
+                                                        value: Number(d[keys[1]] || d.value) || 0,
+                                                        secondary_value: keys.length > 2 ? Number(d[keys[2]]) || 0 : undefined
+                                                    };
+                                                });
+
+                                                return (
+                                                    <ResponsiveContainer width="100%" height="90%">
+                                                        {searchResult.chartType === 'line' ? (
+                                                            <LineChart data={displayData}>
+                                                                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
+                                                                <XAxis dataKey="name" stroke="#ffffff40" tick={{ fill: '#ffffff60', fontSize: 10 }} />
+                                                                <YAxis stroke="#ffffff40" tick={{ fill: '#ffffff60', fontSize: 10 }} />
+                                                                <Tooltip contentStyle={{ backgroundColor: '#002147', borderColor: '#E31E24', color: '#fff' }} />
+                                                                <Line type="monotone" dataKey="value" stroke="#E31E24" strokeWidth={3} dot={{ r: 4, fill: '#FFD700' }} />
+                                                            </LineChart>
+                                                        ) : searchResult.chartType === 'pie' ? (
+                                                            <PieChart>
+                                                                <Pie data={displayData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={70} fill="#E31E24">
+                                                                    {displayData.map((entry, index) => <Cell key={`cell-${index}`} fill={index % 2 === 0 ? '#E31E24' : '#FFD700'} />)}
+                                                                </Pie>
+                                                                <Tooltip contentStyle={{ backgroundColor: '#002147', borderColor: '#E31E24', color: '#fff' }} />
+                                                            </PieChart>
+                                                        ) : (
+                                                            <BarChart data={displayData}>
+                                                                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
+                                                                <XAxis dataKey="name" stroke="#ffffff40" tick={{ fill: '#ffffff60', fontSize: 10 }} />
+                                                                <YAxis stroke="#ffffff40" tick={{ fill: '#ffffff60', fontSize: 10 }} />
+                                                                <Tooltip contentStyle={{ backgroundColor: '#002147', borderColor: '#E31E24', color: '#fff' }} cursor={{ fill: '#ffffff10' }} />
+                                                                <Bar dataKey="value" fill="#E31E24" radius={[4, 4, 0, 0]} />
+                                                                {displayData[0]?.secondary_value !== undefined && (
+                                                                    <Bar dataKey="secondary_value" fill="#FFD700" radius={[4, 4, 0, 0]} />
+                                                                )}
+                                                            </BarChart>
+                                                        )}
+                                                    </ResponsiveContainer>
+                                                );
+                                            })()}
+                                        </div>
+
+                                        {/* Slot 2: Composition */}
+                                        <div className="bg-[#002147]/80 border border-white/5 p-4 rounded-xl flex flex-col items-center justify-center h-64 shadow-inner min-h-[300px]">
+                                            <h4 className="text-white/60 text-xs font-bold uppercase mb-4 text-center tracking-wider w-full">Composition</h4>
+                                            {(() => {
+                                                const rawData = searchResult.secondaryData && searchResult.secondaryData.length > 0
+                                                    ? searchResult.secondaryData
+                                                    : searchResult.primaryData && searchResult.primaryData.length > 0
+                                                        ? searchResult.primaryData
+                                                        : [{ name: 'Waiting for Data', value: 1 }];
+
+                                                const displayData = rawData.map((d, i) => {
+                                                    const keys = Object.keys(d);
+                                                    return {
+                                                        name: String(d[keys[0]] || `Item ${i}`),
+                                                        value: Number(d[keys[1]] || d.value) || 1
+                                                    };
+                                                });
+
+                                                return (
+                                                    <ResponsiveContainer width="100%" height="90%">
+                                                        <PieChart>
+                                                            <Pie data={displayData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={40} outerRadius={70} fill="#FFD700">
+                                                                {displayData.map((entry, index) => <Cell key={`dist-cell-${index}`} fill={displayData.length === 1 && entry.name === 'Waiting for Data' ? '#ffffff30' : (index % 2 === 0 ? '#FFD700' : '#E31E24')} />)}
+                                                            </Pie>
+                                                            <Tooltip contentStyle={{ backgroundColor: '#002147', borderColor: '#E31E24', color: '#fff' }} />
+                                                        </PieChart>
+                                                    </ResponsiveContainer>
+                                                );
+                                            })()}
+                                        </div>
+
+                                        {/* Slot 3: Comparative Trend (Area) */}
+                                        <div className="bg-[#002147]/80 border border-white/5 p-4 rounded-xl items-center flex flex-col justify-center h-64 shadow-inner min-h-[300px]">
+                                            <h4 className="text-white/60 text-xs font-bold uppercase mb-4 text-center tracking-wider w-full">Trend / Volume</h4>
+                                            {(() => {
+                                                const rawData = searchResult.distributionData && searchResult.distributionData.length > 0
+                                                    ? searchResult.distributionData
+                                                    : searchResult.primaryData && searchResult.primaryData.length > 0
+                                                        ? searchResult.primaryData
+                                                        : [{ name: 'Waiting for Data', value: 0 }];
+
+                                                const displayData = rawData.map((d, i) => {
+                                                    const keys = Object.keys(d);
+                                                    return {
+                                                        name: String(d[keys[0]] || `Item ${i}`),
+                                                        value: Number(d[keys[1]] || d.value) || 0
+                                                    };
+                                                });
+
+                                                return (
+                                                    <ResponsiveContainer width="100%" height="90%">
+                                                        <AreaChart data={displayData}>
+                                                            <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
+                                                            <XAxis dataKey="name" stroke="#ffffff40" tick={{ fill: '#ffffff60', fontSize: 10 }} />
+                                                            <YAxis stroke="#ffffff40" tick={{ fill: '#ffffff60', fontSize: 10 }} />
+                                                            <Tooltip contentStyle={{ backgroundColor: '#002147', borderColor: '#E31E24', color: '#fff' }} />
+                                                            <Area type="monotone" dataKey="value" stroke="#FFD700" fill="#E31E24" fillOpacity={0.4} strokeWidth={2} />
+                                                        </AreaChart>
+                                                    </ResponsiveContainer>
+                                                );
+                                            })()}
+                                        </div>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
                     {/* Member context banner */}
                     <AnimatePresence>
                         {selectedMember && (
@@ -113,23 +263,6 @@ const OverviewDashboard = () => {
                                 <button onClick={resetDashboard} className="text-xs bg-white/20 hover:bg-white/30 transition-colors px-3 py-1.5 rounded-full font-bold">
                                     Reset to Global
                                 </button>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-
-                    {/* Search result banner */}
-                    <AnimatePresence>
-                        {searchResult && !selectedMember && (
-                            <motion.div
-                                initial={{ opacity: 0, y: -12 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -12 }}
-                                className="bg-slate-800 text-white rounded-xl px-5 py-3 flex items-center gap-3"
-                            >
-                                <span className="text-lg">🔍</span>
-                                <p className="text-sm">
-                                    <span className="font-bold">AI Search:</span> Highlighting charts relevant to your query. Irrelevant charts are dimmed.
-                                </p>
                             </motion.div>
                         )}
                     </AnimatePresence>
@@ -207,12 +340,14 @@ const OverviewDashboard = () => {
                     </div>
 
                     {/* Row 7: Team Table */}
-                    <TeamTable
-                        selectedMember={selectedMember}
-                        setSelectedMember={setSelectedMember}
-                        resetDashboard={resetDashboard}
-                        isSales={isSales}
-                    />
+                    <div className="mt-8">
+                        <TeamTable
+                            selectedMember={selectedMember}
+                            setSelectedMember={setSelectedMember}
+                            resetDashboard={resetDashboard}
+                            isSales={isSales}
+                        />
+                    </div>
 
                     <div className="h-4" />
                 </main>

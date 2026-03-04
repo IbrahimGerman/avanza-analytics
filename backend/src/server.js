@@ -10,8 +10,10 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Middleware
-app.use(cors());
+app.use(cors({ origin: '*' })); // Explicitly allow all origins for debugging
 app.use(bodyParser.json());
+
+console.log('Middleware Initialized: CORS and BodyParser active.');
 
 // Routes
 app.use('/api', apiRoutes);

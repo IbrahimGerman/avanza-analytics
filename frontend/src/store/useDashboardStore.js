@@ -138,8 +138,17 @@ export const parseSearchQuery = (query, mode, members) => {
 export const useDashboardStore = create((set, get) => ({
     selectedMember: null,
     dashboardMode: 'sales',
+
     searchQuery: '',
-    searchResult: null,
+    searchInputValue: '',
+    searchResult: {
+        primaryData: [],
+        secondaryData: [],
+        distributionData: [],
+        insights: ''
+    },
+    searchLoading: false,
+    searchError: null,
     selectedYear: '2026',
     selectedQuarter: 'Q1',
     notifications: initialNotifications,
@@ -149,18 +158,78 @@ export const useDashboardStore = create((set, get) => ({
     theme: 'light',
 
     setSelectedMember: (member) => {
-        // Handle both object and string (name)
         const name = typeof member === 'object' ? member?.name : member;
         set({ selectedMember: name });
     },
-    resetDashboard: () => set({ selectedMember: null, searchQuery: '', searchResult: null }),
-    setMode: (mode) => {
-        set({ dashboardMode: mode });
-    },
-    setSearchQuery: (q) => {
-        const { dashboardMode } = get();
-        const result = parseSearchQuery(q, dashboardMode, teamMembers);
-        set({ searchQuery: q, searchResult: q ? result : null, selectedMember: result?.member?.name || get().selectedMember });
+    resetDashboard: () => set({
+        selectedMember: null,
+        searchQuery: '',
+        searchResult: { primaryData: [], secondaryData: [], distributionData: [], insights: '' },
+        searchInputValue: ''
+    }),
+    clearData: () => set({
+        searchResult: {
+            primaryData: [],
+            secondaryData: [],
+            distributionData: [],
+            insights: ''
+        },
+        searchQuery: '',
+        searchInputValue: ''
+    }),
+    setMode: (mode) => set({ dashboardMode: mode }),
+    setInputValue: (val) => set({ searchInputValue: val }),
+    handleSearch: async () => {
+        const { searchInputValue } = get();
+        const q = searchInputValue.trim();
+
+        if (!q) {
+            console.log('Search Input Empty, Resetting...');
+            set({ searchQuery: '', searchResult: null, searchLoading: false });
+            return;
+        }
+
+        console.log('Fetching from http://localhost:5000/api/query ...');
+        console.log("🔍 Querying for:", q);
+        get().clearData();
+        set({ searchLoading: true, searchError: null });
+
+        try {
+            const response = await fetch('http://localhost:5000/api/query', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query: q })
+            });
+
+            if (!response.ok) throw new Error(`Backend Error: ${response.status}`);
+            const data = await response.json();
+
+            console.log('Data Received from AI (Triple-Array):', data);
+
+            const memberMatch = teamMembers.find(m =>
+                data.insights?.toLowerCase().includes(m.name.toLowerCase())
+            );
+
+            console.log('Store Updated with Search Result.');
+
+            const frontendParsed = parseSearchQuery(q, get().dashboardMode, teamMembers);
+
+            set({
+                searchQuery: q,
+                searchResult: {
+                    ...frontendParsed,
+                    primaryData: data.primaryData || [],
+                    secondaryData: data.secondaryData || [],
+                    distributionData: data.distributionData || [],
+                    insights: data.insights || ''
+                },
+                searchLoading: false,
+                selectedMember: memberMatch?.name || get().selectedMember
+            });
+        } catch (err) {
+            console.error('Frontend Search Error:', err);
+            set({ searchError: err.message, searchLoading: false });
+        }
     },
     setYear: (year) => set({ selectedYear: year }),
     setQuarter: (quarter) => set({ selectedQuarter: quarter }),
@@ -202,6 +271,18 @@ export const useDashboardStore = create((set, get) => ({
 
     getKpis: () => {
         const { dashboardMode, selectedYear, selectedQuarter, searchResult } = get();
+
+        // If AI returned KPIs, use them!
+        if (searchResult?.kpis?.length > 0) {
+            return searchResult.kpis.map(k => ({
+                label: k.label,
+                value: k.value,
+                change: k.change || '0%',
+                up: !k.change?.includes('-'),
+                icon: k.label.toLowerCase().includes('revenue') ? 'dollar' : 'activity'
+            }));
+        }
+
         let kpis = getKpisForQuarterYear(dashboardMode, selectedYear, selectedQuarter);
         if (searchResult?.type === 'region') {
             const mult = searchResult.filter === 'ME' ? 1.2 : 0.8;
@@ -209,8 +290,25 @@ export const useDashboardStore = create((set, get) => ({
         }
         return kpis;
     },
+
     getMonthlyData: () => {
         const { dashboardMode, selectedYear, selectedQuarter, searchResult } = get();
+
+        // If AI returned structured monthly data, use it
+        if (Array.isArray(searchResult?.data) && searchResult.data.length > 5) {
+            const hasMonth = searchResult.data.some(row => row.month || row.date_trunc || row.month_name);
+            if (hasMonth) {
+                return searchResult.data.map(row => ({
+                    month: row.month || row.month_name || row.date_trunc || 'Unknown',
+                    revenue: parseFloat(row.revenue || row.total || row.sum || row.result || 0),
+                    cost: parseFloat(row.cost || row.expenses || 0),
+                    leads: parseInt(row.leads || row.count || 0),
+                    qualified: parseInt(row.qualified || 0),
+                    conversion: parseInt(row.conversion || 0)
+                }));
+            }
+        }
+
         let data = getMonthlyDataForQuarterYear(dashboardMode, selectedYear, selectedQuarter);
         if (searchResult?.type === 'region') {
             const mult = searchResult.filter === 'ME' ? 1.15 : 0.85;

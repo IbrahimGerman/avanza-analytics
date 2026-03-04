@@ -10,27 +10,40 @@ import {
 } from 'lucide-react';
 
 const TeamAnalytics = () => {
+
     const {
-        dashboardMode, selectedMember, setSelectedMember, resetDashboard
+        dashboardMode, selectedMember, setSelectedMember, resetDashboard,
+        searchResult, searchLoading, searchError
     } = useDashboardStore();
     const isSales = dashboardMode === 'sales';
     const topRef = useRef(null);
     const scrollContainerRef = useRef(null);
 
-    // Auto-scroll on selection
+    // Auto-scroll on search result or selection
     useEffect(() => {
-        if (selectedMember && topRef.current) {
+        if ((searchResult || selectedMember) && topRef.current) {
             topRef.current.scrollIntoView({ behavior: 'smooth' });
         }
-    }, [selectedMember]);
+    }, [searchResult, selectedMember]);
 
-    const leadsPerMember = teamMembers.map(m => ({
-        ...m,
-        leads: isSales ? m.leads : Math.round(m.leads * 1.2),
-        rfcCount: Math.round(m.leads * 0.15),
-        rfpCount: Math.round(m.leads * 0.08),
-        signingValue: m.revenue * (isSales ? 1.2 : 0.8)
-    }));
+
+    const leadsPerMember = teamMembers.map(m => {
+        // If AI returned specific data for this member, prioritize it via primaryData
+        const aiData = Array.isArray(searchResult?.primaryData)
+            ? searchResult.primaryData.find(row =>
+                row.name?.toLowerCase().includes(m.name.toLowerCase()) ||
+                row.owner_id === m.id
+            )
+            : null;
+
+        return {
+            ...m,
+            leads: aiData?.total_leads || (isSales ? m.leads : Math.round(m.leads * 1.2)),
+            qualified: aiData?.qualified || Math.round((aiData?.total_leads || m.leads) * (m.winRate / 100)),
+            conversion: aiData?.conversion ? Math.round(aiData.conversion) : m.winRate,
+            isAiMetric: !!aiData
+        };
+    });
 
     // Slider Controls
     const scroll = (direction) => {
@@ -72,6 +85,41 @@ const TeamAnalytics = () => {
 
                 <main className="flex-1 overflow-y-auto p-6 space-y-6">
 
+                    {/* AI Vision Results Overlay */}
+                    <AnimatePresence>
+                        {searchResult && (
+                            <motion.div
+                                initial={{ opacity: 0, y: -20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                                className="card p-6 bg-slate-900 text-white border-none shadow-2xl relative overflow-hidden group"
+                            >
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-avanza-500/10 blur-3xl rounded-full -mr-16 -mt-16" />
+                                <div className="flex items-start justify-between">
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <div className="px-2 py-0.5 bg-avanza-500 text-[10px] font-black uppercase rounded">AI Perspective</div>
+                                            <h2 className="text-xl font-black">{searchResult.kpis?.[0]?.label || 'Data Analysis'}</h2>
+                                        </div>
+                                        <p className="text-slate-300 text-sm italic font-medium">"{searchResult.insights}"</p>
+
+                                        <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                            {searchResult.kpis?.map((kpi, i) => (
+                                                <div key={i} className="bg-white/5 border border-white/10 p-3 rounded-xl">
+                                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{kpi.label}</p>
+                                                    <p className="text-lg font-black">{kpi.value}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <button onClick={() => resetDashboard()} className="text-slate-500 hover:text-white p-2">
+                                        <X size={20} />
+                                    </button>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
                     {/* Perspective Header / Status */}
                     <div className="flex items-center justify-between">
                         <div>
@@ -82,6 +130,7 @@ const TeamAnalytics = () => {
                                 {isSales ? 'Sales Cycle & Revenue Optimization' : 'RFC/RFP Conversion & Lead Pipeline'}
                             </p>
                         </div>
+                        {/* ... */}
                         <AnimatePresence>
                             {selectedMember && (
                                 <motion.button
@@ -97,38 +146,55 @@ const TeamAnalytics = () => {
                         </AnimatePresence>
                     </div>
 
-                    {/* AI Insight Cards */}
+                    {/* AI Insight Cards - Dynamic if searchResult exists */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="card p-4 bg-gradient-to-br from-avanza-600 to-avanza-500 text-white flex items-center gap-4 shadow-lg">
-                            <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center">
-                                <Zap size={24} />
-                            </div>
-                            <div>
-                                <p className="text-[10px] font-bold uppercase tracking-wider opacity-80">Team Efficiency</p>
-                                <p className="text-lg font-black leading-tight">15% Above Target</p>
-                                <p className="text-[10px] opacity-70">Current velocity vs Q1 projection</p>
-                            </div>
-                        </div>
-                        <div className="card p-4 border-l-4 border-l-blue-500 flex items-center gap-4 bg-white">
-                            <div className="w-10 h-10 bg-blue-50 text-blue-500 rounded-xl flex items-center justify-center">
-                                <Briefcase size={20} />
-                            </div>
-                            <div>
-                                <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Active Pipeline</p>
-                                <p className="text-lg font-black text-slate-800 leading-tight">$3.2M Managed</p>
-                                <p className="text-[10px] text-green-500 font-bold">+8.2% vs Last Week</p>
-                            </div>
-                        </div>
-                        <div className="card p-4 border-l-4 border-l-amber-500 flex items-center gap-4 bg-white">
-                            <div className="w-10 h-10 bg-amber-50 text-amber-500 rounded-xl flex items-center justify-center">
-                                <FileText size={20} />
-                            </div>
-                            <div>
-                                <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">RFC/RFP Status</p>
-                                <p className="text-lg font-black text-slate-800 leading-tight">42 Pending Response</p>
-                                <p className="text-[10px] text-slate-400 font-medium">Avg turnaround: 2.1 days</p>
-                            </div>
-                        </div>
+                        {searchResult && searchResult.kpis?.length >= 3 ? (
+                            searchResult.kpis.slice(0, 3).map((kpi, idx) => (
+                                <div key={idx} className={`card p-4 flex items-center gap-4 ${idx === 0 ? 'bg-gradient-to-br from-avanza-600 to-avanza-500 text-white shadow-lg' : 'bg-white border-l-4 border-l-avanza-500'}`}>
+                                    <div className={`w-12 h-12 ${idx === 0 ? 'bg-white/20' : 'bg-avanza-50 text-avanza-500'} rounded-2xl flex items-center justify-center`}>
+                                        {idx === 0 ? <Zap size={24} /> : idx === 1 ? <Briefcase size={20} /> : <FileText size={20} />}
+                                    </div>
+                                    <div>
+                                        <p className={`text-[10px] font-extrabold uppercase tracking-widest ${idx === 0 ? 'opacity-80' : 'text-slate-400'}`}>{kpi.label}</p>
+                                        <p className={`text-lg font-black leading-tight ${idx === 0 ? 'text-white' : 'text-slate-800'}`}>{kpi.value}</p>
+                                        <p className={`text-[10px] ${idx === 0 ? 'opacity-70' : 'text-green-500 font-bold'}`}>Live from AI Intelligence</p>
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <>
+                                <div className="card p-4 bg-gradient-to-br from-avanza-600 to-avanza-500 text-white flex items-center gap-4 shadow-lg">
+                                    <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center">
+                                        <Zap size={24} />
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] font-bold uppercase tracking-wider opacity-80">Team Efficiency</p>
+                                        <p className="text-lg font-black leading-tight">15% Above Target</p>
+                                        <p className="text-[10px] opacity-70">Current velocity vs Q1 projection</p>
+                                    </div>
+                                </div>
+                                <div className="card p-4 border-l-4 border-l-blue-500 flex items-center gap-4 bg-white">
+                                    <div className="w-10 h-10 bg-blue-50 text-blue-500 rounded-xl flex items-center justify-center">
+                                        <Briefcase size={20} />
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Active Pipeline</p>
+                                        <p className="text-lg font-black text-slate-800 leading-tight">$3.2M Managed</p>
+                                        <p className="text-[10px] text-green-500 font-bold">+8.2% vs Last Week</p>
+                                    </div>
+                                </div>
+                                <div className="card p-4 border-l-4 border-l-amber-500 flex items-center gap-4 bg-white">
+                                    <div className="w-10 h-10 bg-amber-50 text-amber-500 rounded-xl flex items-center justify-center">
+                                        <FileText size={20} />
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">RFC/RFP Status</p>
+                                        <p className="text-lg font-black text-slate-800 leading-tight">42 Pending Response</p>
+                                        <p className="text-[10px] text-slate-400 font-medium">Avg turnaround: 2.1 days</p>
+                                    </div>
+                                </div>
+                            </>
+                        )}
                     </div>
 
                     {/* Performance Table & Radar */}
@@ -137,7 +203,7 @@ const TeamAnalytics = () => {
                             <div className="px-6 py-4 border-b border-slate-50 flex items-center justify-between bg-slate-50/50">
                                 <h3 className="font-bold text-slate-800 text-sm flex items-center gap-2">
                                     <BarChart2 size={16} className="text-avanza-500" />
-                                    Leads per Member & Signing Value
+                                    Leads & Conversions
                                 </h3>
                                 <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Q1 2026 Live</div>
                             </div>
@@ -145,11 +211,10 @@ const TeamAnalytics = () => {
                                 <table className="w-full text-left">
                                     <thead>
                                         <tr className="border-b border-slate-50 bg-slate-50/30">
-                                            <th className="px-5 py-3 text-[10px] font-bold text-slate-400 uppercase">Member</th>
-                                            <th className="px-5 py-3 text-[10px] font-bold text-slate-400 uppercase text-center">Leads</th>
-                                            {!isSales && <th className="px-5 py-3 text-[10px] font-bold text-slate-400 uppercase text-center">RFC/RFP</th>}
-                                            <th className="px-5 py-3 text-[10px] font-bold text-slate-400 uppercase text-center">Win %</th>
-                                            <th className="px-5 py-3 text-[10px] font-bold text-slate-400 uppercase text-right">Signing Value</th>
+                                            <th className="px-5 py-3 text-[10px] font-bold text-slate-400 uppercase">Name</th>
+                                            <th className="px-5 py-3 text-[10px] font-bold text-slate-400 uppercase text-center">Total Leads</th>
+                                            <th className="px-5 py-3 text-[10px] font-bold text-slate-400 uppercase text-center">Qualified</th>
+                                            <th className="px-5 py-3 text-[10px] font-bold text-slate-400 uppercase text-center">Conversion %</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -165,21 +230,14 @@ const TeamAnalytics = () => {
                                                     </button>
                                                 </td>
                                                 <td className="px-5 py-3 text-center text-xs font-black text-slate-800">{m.leads}</td>
-                                                {!isSales && (
-                                                    <td className="px-5 py-3 text-center">
-                                                        <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">{m.rfcCount}/{m.rfpCount}</span>
-                                                    </td>
-                                                )}
+                                                <td className="px-5 py-3 text-center text-xs font-black text-slate-800">{m.qualified}</td>
                                                 <td className="px-5 py-3 text-center">
                                                     <div className="flex items-center justify-center gap-2">
                                                         <div className="w-12 h-1 bg-slate-100 rounded-full overflow-hidden">
-                                                            <div className="h-full rounded-full" style={{ width: `${m.winRate}%`, background: m.color }} />
+                                                            <div className="h-full rounded-full" style={{ width: `${m.conversion}%`, background: m.color }} />
                                                         </div>
-                                                        <span className="text-[10px] font-black text-slate-600">{m.winRate}%</span>
+                                                        <span className="text-[10px] font-black text-slate-600">{m.conversion}%</span>
                                                     </div>
-                                                </td>
-                                                <td className="px-5 py-3 text-right">
-                                                    <span className="text-xs font-black text-avanza-600">${(m.signingValue / 1000).toFixed(1)}K</span>
                                                 </td>
                                             </tr>
                                         ))}
