@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export const teamMembers = [
+export const initialTeamMembers = [
     { id: 1, name: 'Ahmed Khan', role: 'Senior Consultant', avatar: 'AK', department: 'sales', revenue: 87400, leads: 142, deals: 34, winRate: 72, avgDealValue: 2571, conversionRate: 24, activePipeline: 12, trend: 'up', color: '#e11d48', region: 'ME' },
     { id: 2, name: 'Sara Williams', role: 'Account Executive', avatar: 'SW', department: 'sales', revenue: 64200, leads: 118, deals: 27, winRate: 65, avgDealValue: 2378, conversionRate: 23, activePipeline: 9, trend: 'up', color: '#be123c', region: 'APA' },
     { id: 3, name: 'Michael Ross', role: 'Sales Director', avatar: 'MR', department: 'sales', revenue: 112000, leads: 89, deals: 41, winRate: 81, avgDealValue: 2732, conversionRate: 46, activePipeline: 14, trend: 'up', color: '#9f1239', region: 'ME' },
@@ -138,6 +138,96 @@ export const parseSearchQuery = (query, mode, members) => {
 export const useDashboardStore = create((set, get) => ({
     selectedMember: null,
     dashboardMode: 'sales',
+    teamMembers: initialTeamMembers,
+    powerBiData: null,
+
+    fetchPowerBiData: async () => {
+        try {
+            const res = await fetch('http://localhost:5000/api/powerbi-data');
+            if (res.ok) {
+                const response = await res.json();
+                const excelData = response.data || [];
+
+                if (excelData.length === 0) return; // Wait or fallback
+
+                let totalLeads = 0;
+                let totalWon = 0;
+                const consultantMap = {};
+
+                excelData.forEach((row, idx) => {
+                    // Try to map exactly as requested, provide fallback to BRD data columns if missing
+                    let name = row['Consultant Name'];
+                    if (!name && row['Bifurcation of BRD (Phone Banking)']) {
+                        name = row['Availability in Proposal '] || 'Unassigned';
+                    }
+                    if (!name) name = `Consultant ${idx + 1}`;
+
+                    const status = row['Status'] || row['Request Handling'] || 'Lost';
+                    const isWon = status && (String(status).toLowerCase().includes('won') || String(status).toLowerCase().includes('online'));
+
+                    if (!consultantMap[name]) {
+                        consultantMap[name] = {
+                            name,
+                            leads: 0,
+                            won: 0,
+                            revenue: 0,
+                            region: row['Region'] || 'Global',
+                            role: row['Role'] || 'Consultant'
+                        };
+                    }
+
+                    consultantMap[name].leads++;
+                    totalLeads++;
+
+                    if (isWon) {
+                        consultantMap[name].won++;
+                        totalWon++;
+                        // Accumulate revenue using 'Revenue' or 'Signing Value' or default
+                        consultantMap[name].revenue += parseFloat(row['Revenue'] || row['Signing Value'] || 50000);
+                    }
+                });
+
+                const colors = ['#e11d48', '#be123c', '#9f1239', '#7c3aed', '#0891b2', '#C06080', '#6B2D5E'];
+
+                const dynamicTeam = Object.values(consultantMap).map((c, i) => {
+                    const winRate = c.leads > 0 ? Math.round((c.won / c.leads) * 100) : 0;
+                    return {
+                        id: i + 1,
+                        name: c.name,
+                        role: c.role,
+                        avatar: c.name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase(),
+                        department: 'sales',
+                        revenue: c.revenue,
+                        leads: c.leads,
+                        deals: c.won,
+                        winRate: winRate,
+                        avgDealValue: c.won > 0 ? Math.round(c.revenue / c.won) : 0,
+                        conversionRate: winRate,
+                        activePipeline: c.leads - c.won,
+                        trend: winRate > 50 ? 'up' : 'down',
+                        color: colors[i % colors.length],
+                        region: c.region
+                    };
+                });
+
+                const globalWinRate = totalLeads > 0 ? ((totalWon / totalLeads) * 100).toFixed(1) : "0.0";
+
+                // completely override the initial state based on live data
+                set({
+                    teamMembers: dynamicTeam,
+                    powerBiData: {
+                        metrics: {
+                            winRate: `${globalWinRate}%`,
+                            totalLeads: String(totalLeads),
+                            signingValue: `$${(Object.values(consultantMap).reduce((acc, c) => acc + c.revenue, 0) / 1000000).toFixed(2)}M`
+                        }
+                    }
+                });
+            }
+        } catch (err) {
+            console.error('Failed to fetch live Power BI / Excel data', err);
+        }
+    },
 
     searchQuery: '',
     searchInputValue: '',
@@ -206,13 +296,13 @@ export const useDashboardStore = create((set, get) => ({
 
             console.log('Data Received from AI (Triple-Array):', data);
 
-            const memberMatch = teamMembers.find(m =>
+            const memberMatch = get().teamMembers.find(m =>
                 data.insights?.toLowerCase().includes(m.name.toLowerCase())
             );
 
             console.log('Store Updated with Search Result.');
 
-            const frontendParsed = parseSearchQuery(q, get().dashboardMode, teamMembers);
+            const frontendParsed = parseSearchQuery(q, get().dashboardMode, get().teamMembers);
 
             set({
                 searchQuery: q,
@@ -253,7 +343,7 @@ export const useDashboardStore = create((set, get) => ({
             }));
         }
 
-        const member = teamMembers.find(m => m.name === memberName);
+        const member = get().teamMembers.find(m => m.name === memberName);
 
         // Mock balanced data based on member attributes or balanced defaults for Priya/Umer/etc.
         const seed = (member?.id || 1) * 7;
@@ -270,7 +360,7 @@ export const useDashboardStore = create((set, get) => ({
     },
 
     getKpis: () => {
-        const { dashboardMode, selectedYear, selectedQuarter, searchResult } = get();
+        const { dashboardMode, selectedYear, selectedQuarter, searchResult, powerBiData } = get();
 
         // If AI returned KPIs, use them!
         if (searchResult?.kpis?.length > 0) {
@@ -284,6 +374,26 @@ export const useDashboardStore = create((set, get) => ({
         }
 
         let kpis = getKpisForQuarterYear(dashboardMode, selectedYear, selectedQuarter);
+
+        // If PowerBI live data is present and we're not filtering deeply by AI
+        if (powerBiData && powerBiData.metrics) {
+            kpis = kpis.map(k => {
+                if (k.label.toLowerCase().includes('win rate')) {
+                    return { ...k, value: powerBiData.metrics.winRate || '14.2%' };
+                }
+                if (k.label.toLowerCase().includes('total leads') || k.label.toLowerCase().includes('active leads')) {
+                    return { ...k, value: powerBiData.metrics.totalLeads || '0' };
+                }
+                if (k.label.toLowerCase().includes('revenue')) {
+                    return { ...k, value: powerBiData.metrics.signingValue || '$1.58M' };
+                }
+                if (k.label.toLowerCase().includes('qualified')) {
+                    return { ...k, value: String(powerBiData.metrics.totalLeads ? Math.round(Number(powerBiData.metrics.totalLeads) * 0.7) : 150) };
+                }
+                return k;
+            });
+        }
+
         if (searchResult?.type === 'region') {
             const mult = searchResult.filter === 'ME' ? 1.2 : 0.8;
             kpis = kpis.map(k => ({ ...k, value: typeof k.value === 'string' && k.value.startsWith('$') ? `$${(parseFloat(k.value.replace(/[$,M]/g, '')) * mult).toFixed(1)}M` : k.value }));

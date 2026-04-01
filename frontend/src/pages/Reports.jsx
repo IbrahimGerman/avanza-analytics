@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useDashboardStore, teamMembers } from '../store/useDashboardStore';
+import { useDashboardStore } from '../store/useDashboardStore';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import { Download, FileSpreadsheet, FileText, TrendingUp, DollarSign, Target, BarChart2, CheckCircle, Users } from 'lucide-react';
 
 const Reports = () => {
-    const { dashboardMode, selectedYear, selectedQuarter, getKpis } = useDashboardStore();
+    const { dashboardMode, selectedYear, selectedQuarter, getKpis, teamMembers } = useDashboardStore();
     const isSales = dashboardMode === 'sales';
     const kpis = getKpis();
     const [downloading, setDownloading] = useState(null);

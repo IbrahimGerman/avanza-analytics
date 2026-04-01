@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useDashboardStore, teamMembers } from '../store/useDashboardStore';
+import { useDashboardStore } from '../store/useDashboardStore';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import TeamRadar from '../components/TeamRadar';
@@ -13,7 +13,7 @@ const TeamAnalytics = () => {
 
     const {
         dashboardMode, selectedMember, setSelectedMember, resetDashboard,
-        searchResult, searchLoading, searchError
+        searchResult, searchLoading, searchError, teamMembers
     } = useDashboardStore();
     const isSales = dashboardMode === 'sales';
     const topRef = useRef(null);
@@ -25,7 +25,6 @@ const TeamAnalytics = () => {
             topRef.current.scrollIntoView({ behavior: 'smooth' });
         }
     }, [searchResult, selectedMember]);
-
 
     const leadsPerMember = teamMembers.map(m => {
         // If AI returned specific data for this member, prioritize it via primaryData

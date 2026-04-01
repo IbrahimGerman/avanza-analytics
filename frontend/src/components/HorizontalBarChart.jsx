@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
 } from 'recharts';
-import { teamMembers } from '../store/useDashboardStore';
+import { useDashboardStore } from '../store/useDashboardStore';
 
 const TooltipContent = ({ active, payload, label }) => {
     if (!active || !payload?.length) return null;
@@ -16,6 +16,7 @@ const TooltipContent = ({ active, payload, label }) => {
 };
 
 const HorizontalBarChart = ({ selectedMember, faded = false }) => {
+    const { teamMembers } = useDashboardStore();
     const data = teamMembers.map((m) => ({ name: m.name, winRate: m.winRate }));
 
     return (

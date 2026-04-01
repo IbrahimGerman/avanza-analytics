@@ -18,11 +18,12 @@ import ProductStackedBar from '../components/ProductStackedBar';
 import DealGrowthChart from '../components/DealGrowthChart';
 import RegionHeatmap from '../components/RegionHeatmap';
 import LeadConversionChart from '../components/LeadConversionChart';
-import { teamMembers } from '../store/useDashboardStore';
+import { initialTeamMembers as teamMembers } from '../store/useDashboardStore';
+import StatCard from '../components/StatCard';
 
-const getMemberKpis = (member, isSales) => {
+const getMemberKpis = (member, isSales, teamArray) => {
     if (!member) return null;
-    const m = teamMembers.find((t) => t.name === member);
+    const m = teamArray.find((t) => t.name === member);
     if (!m) return null;
     return isSales
         ? [
@@ -43,9 +44,9 @@ const getMemberKpis = (member, isSales) => {
         ];
 };
 
-const insightCards = (mode, member) => {
+const insightCards = (mode, member, teamArray) => {
     if (member) {
-        const m = teamMembers.find((t) => t.name === member);
+        const m = teamArray.find((t) => t.name === member);
         if (!m) return [];
         return [
             { icon: '🤖', text: `${m.name} has a ${m.winRate}% win rate — ${m.winRate >= 70 ? 'above' : 'below'} team average of 66%.`, type: m.winRate >= 70 ? 'positive' : 'warning' },
@@ -74,14 +75,18 @@ const chartRelevancy = (searchResult) => {
 };
 
 const OverviewDashboard = () => {
-    const { selectedMember, dashboardMode, setSelectedMember, resetDashboard, searchResult, getKpis, getMonthlyData, searchQuery } = useDashboardStore();
+    const { selectedMember, dashboardMode, setSelectedMember, resetDashboard, searchResult, getKpis, getMonthlyData, searchQuery, teamMembers, fetchPowerBiData, powerBiData } = useDashboardStore();
     const isSales = dashboardMode === 'sales';
 
+    React.useEffect(() => {
+        fetchPowerBiData();
+    }, [fetchPowerBiData]);
+
     const baseKpis = getKpis();
-    const memberKpis = getMemberKpis(selectedMember, isSales);
+    const memberKpis = getMemberKpis(selectedMember, isSales, teamMembers);
     const activeKpis = memberKpis || baseKpis;
     const monthlyData = getMonthlyData();
-    const insights = insightCards(dashboardMode, selectedMember);
+    const insights = insightCards(dashboardMode, selectedMember, teamMembers);
 
     const shouldFade = chartRelevancy(searchResult);
     const globalFaded = !!selectedMember;
@@ -266,6 +271,12 @@ const OverviewDashboard = () => {
                             </motion.div>
                         )}
                     </AnimatePresence>
+
+                    {/* Dynamic Power BI Replacement Stat Cards */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                        <StatCard title="Win Rate" value={powerBiData?.metrics?.winRate || "0%"} trend="up" change="Live Data" color="blue" />
+                        <StatCard title="Total Leads" value={powerBiData?.metrics?.totalLeads || "0"} trend="up" change="Live Data" color="teal" />
+                    </div>
 
                     {/* Row 1: AI Insights */}
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
